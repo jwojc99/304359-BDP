@@ -1,0 +1,50 @@
+
+2.
+create database cw2;
+
+3.
+create EXTENSION postgis;
+
+4.
+create table buildings(id serial primary key, geometry geometry, name varchar(50));
+create table roads(id serial primary key, geometry geometry, name varchar(50));
+create table poi(id serial primary key, geometry geometry, name varchar(50));
+
+5.
+insert into buildings values(1,ST_Geomfromtext('POLYGON((8 1.5, 8 4, 10.5 4, 10.5 1.5, 8 1.5))'),'BuildingA');
+insert into buildings values(2,ST_Geomfromtext('POLYGON((4 5, 4 7, 6 7, 6 5, 4 5))'),'BuildingB');
+insert into buildings values(3,ST_Geomfromtext('POLYGON((3 6, 3 8, 5 8, 5 6, 3 6))'),'BuildingC');
+insert into buildings values (4,ST_Geomfromtext('POLYGON((9 8,9 9, 10 9, 10 8, 9 8))'),'BuildingD');
+insert into buildings values (5,ST_Geomfromtext('POLYGON((1 1,1 2, 2 2, 2 1, 1 1))'),'BuildingF');
+
+insert into poi values (1,ST_Geomfromtext('POINT(9.5 6)'),'I');
+insert into poi values (2,ST_Geomfromtext('POINT(6.5 6)'),'J');
+insert into poi values (3,ST_Geomfromtext('POINT(6 9.5)'),'K');
+insert into poi values (4,ST_Geomfromtext('POINT(1 3.5)'),'G');
+insert into poi values (5,ST_Geomfromtext('POINT(5.5 1.5)'),'H');
+
+insert into roads values(1,ST_Geomfromtext('LINESTRING(0 4.5,12 4.5)'),'RoadX');
+insert into roads values(2,ST_Geomfromtext('LINESTRING(7.5 10.5, 7.5 0)'),'RoadY');
+
+6.
+a)
+ select SUM(st_length(geometry)) from roads;
+
+b)
+ select ST_ASEWKT(geometry), ST_AREA(geometry),ST_PERIMETER(geometry) from buildings where name = 'BuildingA';
+
+c)
+ select name, ST_AREA(geometry) from buildings order by name;
+
+d)
+ select name, st_perimeter(geometry) from buildings order by st_area(geometry) desc limit 2;
+
+e)
+ select ST_distance(C.geometry,G.geometry) from buildings C,poi G where C.name = 'BuildingC' and G.name = 'G';
+
+f)
+ select ST_area(ST_intersection(ST_buffer((select geometry from buildings where name = 'BuildingB'),0.5),(select geometry from buildings where name like 'BuildingC')));
+
+g)
+select ST_area(ST_symdifference((select geometry from buildings where name = 'BuildingC'), ST_geomfromtext('Polygon((4 7, 6 7, 6 8, 4 8, 4 7))')));
+
