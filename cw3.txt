@@ -1,0 +1,22 @@
+--4.
+SELECT distinct a.* INTO tableB FROM popp a, majrivers b WHERE a.f_codedesc = 'Building' and ST_DISTANCE(a.geom,b.geom)<1000;
+SELECT COUNT(*) FROM tableB;
+
+--5.
+SELECT name, geom, elev INTO airportsNew FROM airports;
+
+-a)
+SELECT name,geom INTO airportsWE FROM airportsNew ORDER BY ST_X(ST_centroid(geom)) LIMIT 1;
+INSERT INTO airportsWE(name,geom) SELECT name,geom  FROM airportsNew ORDER BY ST_X(ST_centroid(geom)) desc LIMIT 1;
+SELECT * FROM airportsWE;
+
+-b)
+INSERT INTO airportsNew(name,geom,elev) VALUES ('airportB',(SELECT ST_LineInterpolatePoint(ST_ShortestLine(a.geom,b.geom),0.5) FROM airportsWE a, airportsWE b WHERE a.name='ATKA' and b.name='ANNETTE ISLAND'),10);
+
+SELECT * FROM airportsNew where name='airportB';
+
+--6.
+SELECT ST_Area(ST_Buffer(ST_ShortestLine(a.geom,b.geom),1000)) FROM airports a, lakes b WHERE a.name = 'AMBLER' and b.names = 'Iliamna Lake';
+
+--7.
+SELECT SUM(ST_Area(ST_Intersection(t.geom, a.geom))) as tree_areas, vegdesc FROM trees t, (SELECT geom FROM tundra UNION ALL SELECT geom FROM swamp) a WHERE ST_Intersects(t.geom, a.geom) GROUP BY t.vegdesc;
